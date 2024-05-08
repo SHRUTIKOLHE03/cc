@@ -1,0 +1,312 @@
+##################################Practical 1:
+#bfs
+graph = {
+    'A': ['B', 'C', 'E'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F', 'G'],
+    'D': ['B'],
+    'E': ['B'],
+    'F': ['C'],
+    'G': ['C']
+}
+def bfs(graph, initial):
+    visited = []  # List to keep track of visited nodes
+    queue = [initial]  # Initialize a queue with the initial node   
+    while queue:  # While there are nodes in the queue
+        node = queue.pop(0)  # Remove the first node from the queue
+        if node not in visited:  # If the node has not been visited
+            visited.append(node)  # Mark the node as visited
+            neighbours = graph[node]  # Get the neighbors of the current node   
+            for neighbour in neighbours:  # For each neighbor of the current node
+                queue.append(neighbour)  # Add the neighbor to the queue            
+    return visited  # Return the list of visited nodes
+# Call the bfs function with the graph and the initial node 'A'
+print(bfs(graph, 'A'))
+
+graph = {
+    'A': ['B', 'C', 'D'],  # Node A is connected to nodes B, C, and D
+    'B': ['E'],            # Node B is connected to node E
+    'C': ['D', 'E'],       # Node C is connected to nodes D and E
+    'D': [],               # Node D has no outgoing connections
+    'E': []                # Node E has no outgoing connections
+}
+visited = set()            # Create an empty set to keep track of visited nodes
+def dfs(visited, graph, root):
+    if root not in visited:   # If the current node has not been visited yet
+        print(root)           # Print the current node
+        visited.add(root)     # Add the current node to the set of visited nodes
+        for neighbour in graph[root]:  # For each neighboring node of the current node
+            dfs(visited, graph, neighbour)  # Recursively call dfs for each neighboring node
+# Call the dfs function with the set of visited nodes, the graph, and the starting node 'A'
+dfs(visited, graph, 'A')
+
+
+print(dfs(visited, graph, 'A'))
+
+###################################Practical 2:A star
+global g
+g=0
+def print_board(elements):
+    for i in range(9):
+        if i%3 == 0:
+            print()
+        if elements[i]==-1:
+            print("_", end = " ")
+        else:
+            print(elements[i], end = " ")
+    print()
+
+def solvable(start):
+    inv=0
+
+    for i in range(9):
+        if start[i] <= 1:
+            continue
+        for j in range(i+1,9):
+            if start[j]==-1:
+                continue
+            if start[i]>start[j]:
+                inv+=1
+    if inv%2==0:
+        return True
+    return False
+
+def heuristic(start,goal):
+    global g
+    h = 0
+    for i in range(9):
+        for j in range(9):
+            if start[i] == goal[j] and start[i] != -1:
+                h += (abs(j-i))//3 + (abs(j-i))%3
+    return h + g
+
+def moveleft(start,position):
+    start[position],start[position-1]= start[position-1],start[position]
+
+def moveright(start,position):
+    start[position],start[position+1]= start[position+1],start[position]
+
+def moveup(start,position):
+    start[position],start[position-3]= start[position-3],start[position]
+
+def movedown(start,position):
+    start[position],start[position+3]= start[position+3],start[position]
+
+
+def movetile(start,goal):
+    emptyat = start.index(-1) 
+    row = emptyat//3
+    col = emptyat%3
+
+    t1,t2,t3,t4 = start[:],start[:],start[:],start[:]
+    f1,f2,f3,f4 = 100,100,100,100
+
+    if col-1 >= 0:
+        moveleft(t1, emptyat)
+        f1 = heuristic(t1, goal)
+    if col+1 < 3:
+        moveright(t2, emptyat)
+        f2 = heuristic(t2, goal)
+    if row + 1 < 3:
+        movedown(t3, emptyat)
+        f3 = heuristic(t3, goal)
+    if row-1 >= 0 :
+        moveup(t4, emptyat)
+        f4 = heuristic(t4, goal)
+    
+    
+    min_heuristic = min(f1, f2, f3, f4)
+
+    if f1==min_heuristic:
+        moveleft(start, emptyat)
+    elif f2==min_heuristic:
+        moveright(start, emptyat)
+    elif f3==min_heuristic:
+        movedown(start, emptyat)
+    elif f4 == min_heuristic:
+        moveup(start, emptyat)
+        
+        
+def solveEight(start,goal):
+    global g
+    g+=1
+    movetile(start,goal)
+    print_board(start)
+    f = heuristic(start,goal)
+    print(f"f(n): {f}")
+    if f == g:
+        print(f"\nSolved in {f} moves")
+        return
+    solveEight(start,goal)
+
+start = list()
+goal = list()
+print("Enter the start state:(Enter -1 for empty):")
+for i in range(9):
+    start.append(int(input()))
+print("Enter the goal state:(Enter -1 for empty):")
+for i in range(9):
+    goal.append(int(input()))
+
+
+print('Start state')
+print_board(start)
+print("----------------------------------------------- ")
+
+if solvable(start):
+    solveEight(start,goal)
+else:
+    print("Not possible to solve")
+
+################################Practical 3: Prims
+print("Program for prims algorithm...")
+INF = 9999999  # Define a very large number to represent infinity
+
+# Number of vertices in the graph
+N = 5
+
+# Creating the graph using the adjacency matrix method
+G = [[0, 19, 5, 0, 0],
+[19, 0, 5, 9, 2],
+[5, 5, 0, 1, 6],
+[0, 9, 1, 0, 1],
+[0, 2, 6, 1, 0]]
+
+# Initialize an array to keep track of selected nodes
+selected_node = [0, 0, 0, 0, 0]
+
+# Initialize the number of edges selected to 0
+no_edge = 0
+
+# Select the first node (node 0) as the starting node
+selected_node[0] = True
+
+# Print the header for the output (Edge : Weight)
+print("Edge : Weight\n")
+
+# Loop until we have selected N-1 edges (minimum spanning tree for N nodes)
+while (no_edge < N - 1):
+    minimum = INF  # Initialize the minimum weight to infinity
+    a = 0  # Initialize variable 'a' to keep track of the edge's starting node
+    b = 0  # Initialize variable 'b' to keep track of the edge's ending node
+    # Iterate over all nodes
+    for m in range(N):
+        # Check if the current node is selected
+        if selected_node[m]:
+            # Iterate over all nodes again
+            for n in range(N):
+                # Check if the current node is not selected and there is an edge between m and n
+                if ((not selected_node[n]) and G[m][n]):  
+                    # Check if the weight of the current edge is less than the current minimum
+                    if minimum > G[m][n]:
+                        minimum = G[m][n]  # Update the minimum weight
+                        a = m  # Update the starting node of the minimum edge
+                        b = n  # Update the ending node of the minimum edge
+            # Print the selected edge and its weight
+    print(str(a) + "-" + str(b) + ":    " + str(G[a][b]))
+    # Mark the ending node of the selected edge as visited
+    selected_node[b] = True
+    # Increment the number of selected edges
+    no_edge += 1            
+
+##########################################Practical 4:N queens
+class NQueensProblem:
+    def __init__(self, n):
+        self.queens = [0] * n
+        self.numSolutions = 0
+
+    def solve(self):
+        self.solve_helper(0)
+
+    def solve_helper(self, row):
+        if row == len(self.queens):
+            self.numSolutions += 1
+            self.print_solution()
+        else:
+            for col in range(len(self.queens)):
+                self.queens[row] = col
+                if self.is_valid(row, col):
+                    self.solve_helper(row + 1)
+
+    def is_valid(self, row, col):
+        for i in range(row):
+            diff = abs(self.queens[i] - col)
+            if diff == 0 or diff == row - i:
+                return False
+        return True
+
+    def print_solution(self):
+        if self.numSolutions == 1:
+            print("Solution: ", end="")
+            for i in range(len(self.queens)):
+                print(self.queens[i], end=" ")
+            print()
+            print("The Matrix Representation:")
+            arr = [[0] * len(self.queens) for _ in range(len(self.queens))]
+            for i in range(len(self.queens)):
+                for j in range(len(self.queens)):
+                    if j == self.queens[i]:
+                        arr[i][j] = 1
+            for i in range(len(self.queens)):
+                for j in range(len(self.queens)):
+                    print(arr[i][j], end=" ")
+                print()
+
+if __name__ == "__main__":
+    n = int(input("Enter N Queens Problem: "))
+    NQueensProblem = NQueensProblem(n)
+    NQueensProblem.solve()
+
+#############################################Practical 5:
+def simple_chatbot():
+    print("Hello! I'm a simple chatbot. How can I assist you today?")
+    
+    while True:
+        user_input = input("You: ").lower()  # Get user input and convert it to lowercase
+        
+        if user_input == "hello":
+            print("Chatbot: Hi there!")
+        elif user_input == "how are you?":
+            print("Chatbot: I'm just a program, so I don't have feelings, but thank you for asking!")
+        elif user_input == "what is your name?":
+            print("Chatbot: I'm just a simple chatbot.")
+        elif "how" in user_input and "you" in user_input and "?" in user_input:
+            print("Chatbot: I'm doing well, thank you for asking!")
+        elif "weather" in user_input:
+            print("Chatbot: I'm sorry, I'm not equipped to provide weather updates.")
+        elif user_input == "bye":
+            print("Chatbot: Bye, Have a good day!")
+        elif user_input == "exit":
+            print("Chatbot: Goodbye!")
+            break  # Exit the loop and end the chatbot
+        else:
+            print("Chatbot: I'm sorry, I didn't understand that. Can you please rephrase or ask another question?")
+
+# Start the chatbot
+simple_chatbot()
+
+
+#######################
+from chatterbot.trainers import ListTrainer
+from chattterbot import ChatBot
+
+chatbot=ChatBot("Bot")
+conversation=["Hello",
+              "Hi There!",
+              "How are you doing?"
+              ,"I'm good",
+              "Thats good to hear",
+              "How can I help you?",
+              "Thank you",
+              "Your Welcome"]
+
+trainer=ListTrainer(chatbot)
+trainer.train(conversation)
+print("Enter quit to stop...")
+while True:
+    text_input=input("You: ").lower()
+    if text_input=="quit":
+        break
+print(chatbot.get_response(text_input))
+
+    
